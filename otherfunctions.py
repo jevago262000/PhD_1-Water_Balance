@@ -153,3 +153,44 @@ def ee_array_to_df(arr, list_of_bands):
     df = df.set_index("datetime")
 
     return df
+
+
+def calculate_months(ini_date, fin_date, datetime):
+
+    from dateutil import relativedelta
+
+    # convert string to date object
+    s_date = datetime.datetime.strptime(ini_date, "%Y-%m")
+    e_date = datetime.datetime.strptime(fin_date, "%Y-%m")
+
+    # Get the relativedelta between two dates
+    delta = relativedelta.relativedelta(e_date, s_date)
+    # get months difference
+    res_months = delta.months + (delta.years * 12) + 1
+    return res_months
+
+
+# Function to determine the simulation period and the reporting period
+def determine_period(start_date, end_date, warmup_yrs = 0):
+
+    import datetime
+
+    ini_date = str((int(start_date.split("-")[0]) + int(warmup_yrs))) + "-" + start_date.split("-")[1]
+    if (end_date.split("-")[1]) == "12":
+        fin_date = str(int(end_date.split("-")[0]) + 1) + "-01"
+    else:
+        fin_date = str(int(end_date.split("-")[0])) + "-" + str(int(end_date.split("-")[1]) + 1)
+
+    if (datetime.datetime(int(ini_date.split("-")[0]), int(ini_date.split("-")[1]), 1) >= datetime.datetime(int(fin_date.split("-")[0]), int(fin_date.split("-")[1]), 1)):
+        if (warmup_yrs != 0):
+            print ("Start date is finally set beyond or same as the end date! Please consider the implications of the warm-up years. Remember that end date is exclusive")
+        else:
+            print ("Start date is finally set beyond or same as the end date! Please review your input dates. Remember that end date is exclusive")
+        raise SystemExit()
+
+    months1 = calculate_months(start_date, end_date, datetime)
+    months2 = calculate_months(ini_date, end_date, datetime)
+
+    print ("Simulation period will be from " + start_date + " to " + end_date + " (" + str(months1) + " months)"
+           + "; however, outputs will be provided for " + ini_date + " to " + end_date + " (" + str(months2) + " months)")
+    return ini_date, fin_date
