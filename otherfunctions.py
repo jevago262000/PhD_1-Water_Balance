@@ -194,3 +194,13 @@ def determine_period(start_date, end_date, warmup_yrs = 0):
     print ("Simulation period will be from " + start_date + " to " + end_date + " (" + str(months1) + " months)"
            + "; however, outputs will be provided for " + ini_date + " to " + end_date + " (" + str(months2) + " months)")
     return ini_date, fin_date
+
+
+# Function to create folders if they do not exist
+def folders_exist(directories):
+
+    import os
+    
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
