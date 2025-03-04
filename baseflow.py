@@ -1,54 +1,46 @@
 import numpy as np
 import os
 
-def caps(file_name):
-    """
-    Converts all capital letters to lowercase letters in a filename.
-    
-    Parameters:
-    file_name (str): The filename to convert
-    
-    Returns:
-    str: The lowercase version of the filename
-    """
-    low_case = "abcdefghijklmnopqrstuvwxyz"
-    up_case = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    
-    temp_name = file_name
-    
-    for i in range(len(file_name)):
-        j = up_case.find(file_name[i:i+1])
-        if j != -1:
-            temp_name = temp_name[:i] + low_case[j:j+1] + temp_name[i+1:]
-    
-    # Remove leading whitespace
-    temp_name = temp_name.lstrip()
-    
-    return temp_name
-
 def main():
     """
     Main program to estimate groundwater contributions from USGS streamflow records.
     Uses a recursive filter technique to separate base flow and calculate
     the streamflow recession constant (alpha).
     """
+
+    # Get user input for paths
+    try:
+        input_dir = raw_input("Enter the path to the input files: ").strip()  # Python 2
+        output_dir = raw_input("Enter the path to save output files: ").strip()  # Python 2
+    except NameError:
+        input_dir = input("Enter the path to the input files: ").strip()  # Python 3
+        output_dir = input("Enter the path to save output files: ").strip()  # Python 3
+
+    # Ensure output directory exists
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
     # Initialize universal variables
     ndmin = 0
     ndmax = 0
     iprint = 0
+
+    # Define paths for files
+    baseflow_file = os.path.join(output_dir, "baseflow.dat")
+    input_list_file = os.path.join(input_dir, "file.lst")
     
     # Open output files
-    with open("baseflow.dat", 'w') as outfile:
+    with open(baseflow_file, 'w') as outfile:
         outfile.write("Baseflow data file: this file summarizes the fraction of streamflow that is contributed by baseflow for each of the 3 passes made by the program\n\n")
         outfile.write("Gage file      Baseflow Fr1 Baseflow Fr2 Baseflow Fr3   NPR Alpha Factor Baseflow Days\n")
     
     # Process input file
-    with open("file.lst", 'r') as infile:
+    with open(input_list_file, 'r') as infile:
         # Process preliminary information
         titldum = infile.readline()  # Skip first line
-        ndmin = int(infile.readline())
-        ndmax = int(infile.readline())
-        iprint = int(infile.readline())
+        ndmin = int(infile.readline().split()[0])
+        ndmax = int(infile.readline().split()[0])
+        iprint = int(infile.readline().split()[0])
         titldum = infile.readline()  # Skip line
         titldum = infile.readline()  # Skip line
         
@@ -59,12 +51,14 @@ def main():
             
             parts = line.strip().split()
             if len(parts) >= 2:
-                flwfile = parts[0]
-                flwfileo = parts[1]
+                flwfile_name = parts[0]
+                flwfileo_name = parts[1]
             else:
                 continue
             
-            flwfile = caps(flwfile)
+            # Construct full file paths
+            flwfile = os.path.join(input_dir, str(flwfile_name).lower())
+            flwfileo = os.path.join(output_dir, str(flwfileo_name).lower())
             
             # Find out number of years of stream gage data
             with open(flwfile, 'r') as datafile:
@@ -351,21 +345,23 @@ def main():
                 alf = ssxy / ssxx
                 bfd = 2.3 / alf
                 
-                with open("baseflow.dat", 'a') as outfile:
-                    outfile.write(f"{flwfile:15s} {bflw_fr1:12.2f} {bflw_fr2:12.2f} {bflw_fr3:12.2f} {npr:6d} {alf:12.4f} {bfd:13.4f}\n")
+                with open(baseflow_file, 'a') as outfile:
+                    outfile.write("{:<15} {:>12.2f} {:>12.2f} {:>12.2f} {:>6d} {:>12.4f} {:>13.4f}\n".format(
+                        flwfile_name, bflw_fr1, bflw_fr2, bflw_fr3, npr, alf, bfd))
             else:
-                with open("baseflow.dat", 'a') as outfile:
-                    outfile.write(f"{flwfile:15s} {bflw_fr1:12.2f} {bflw_fr2:12.2f} {bflw_fr3:12.2f}\n")
+                with open(baseflow_file, 'a') as outfile:
+                    outfile.write("{:<15} {:>12.2f} {:>12.2f} {:>12.2f}\n".format(
+                        flwfile_name, bflw_fr1, bflw_fr2, bflw_fr3))
             
             # If daily baseflow values are wanted
             if iprint == 1:
-                flwfileo = caps(flwfileo)
                 with open(flwfileo, 'w') as outfile:
-                    outfile.write(f"Daily baseflow filters values for data from: {flwfile}\n")
+                    outfile.write("Daily baseflow filters values for data from: {}\n".format(flwfile_name))
                     outfile.write("YEARMNDY   Streamflow  Bflow Pass1  Bflow Pass2  Bflow Pass3\n")
                     
                     for i in range(ndays):
-                        outfile.write(f"{iyr[i]:4d}{mon[i]:2d}{iday[i]:2d} {strflow[i]:12.6e} {baseq[0, i]:12.6e} {baseq[1, i]:12.6e} {baseq[2, i]:12.6e}\n")
+                        outfile.write("{:4d}{:2d}{:2d} {:12.6e} {:12.6e} {:12.6e} {:12.6e}\n".format(
+                            iyr[i], mon[i], iday[i], strflow[i], baseq[0, i], baseq[1, i], baseq[2, i]))
 
 if __name__ == "__main__":
     main()
