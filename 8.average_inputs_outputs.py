@@ -143,4 +143,6 @@ average_monthly(wd, working_var, finalRange)
 generate_annual(wd, working_var, finalRange)
 average_annual(wd, working_var, finalRange)
 
+arcpy.CheckInExtension("spatial")
+
 print("DONE!!!")
