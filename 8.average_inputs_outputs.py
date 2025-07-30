@@ -27,7 +27,8 @@ rangeYears = input("Type the interval of years to process (e.g., '1958-2023') "
 variable = int(input("Type 1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'wyield': "))
 
 # Options of variables
-weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'wyield'}
+#weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'wyield'}
+weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow2', 9: 'wyield2'}
 bands_gee = ["pr", "pet", "ro"] # band names in gee
 tc_vars = ["ppt", "pet", "q"] # variable names according to TerraClimate
 
