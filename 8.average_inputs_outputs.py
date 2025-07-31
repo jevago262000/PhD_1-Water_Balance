@@ -24,11 +24,10 @@ os.system('cls')
 #wd = input("Enter the path of the variable to be precessed: ")
 rangeYears = input("Type the interval of years to process (e.g., '1958-2023') "
                     "or just press Enter to take the interval by default (including a 6-yr warm-up period): ")
-variable = int(input("Type 1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'wyield': "))
+variable = int(input("Type 1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow2', 10: 'wyield', 11: 'wyield2': "))
 
 # Options of variables
-#weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'wyield'}
-weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow2', 9: 'wyield2'}
+weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow2', 10: 'wyield', 11: 'wyield2'}
 bands_gee = ["pr", "pet", "ro"] # band names in gee
 tc_vars = ["ppt", "pet", "q"] # variable names according to TerraClimate
 
@@ -42,6 +41,10 @@ working_var = weather_vars[variable]
 if working_var in tc_vars:
     wd = r"Z:\PhD_Datasets&Analysis\Info_Inputs\TerraClimate\GeoTIFF"
     warmup_yrs = 0 # Number of years to be discarded for the warm-up period
+elif working_var in ["bflow2", "wyield2"]:
+    wd = r"Z:\PhD_Datasets&Analysis\Outputs\T&M_WBM" + r"\\" + working_var
+    working_var = working_var[:-1]  # Remove the last character '2' from the variable name
+    warmup_yrs = 6 # Number of years to be discarded for the warm-up period
 else:
     wd = r"Z:\PhD_Datasets&Analysis\Outputs\T&M_WBM" + r"\\" + working_var
     warmup_yrs = 6 # Number of years to be discarded for the warm-up period
