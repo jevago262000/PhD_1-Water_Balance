@@ -193,7 +193,7 @@ if __name__ == "__main__":
     
     # Determine number of processes to use
     #num_processes = min(mp.cpu_count() - 1, len(years))  # Leave one core free, or use number of years if fewer
-    num_processes = min(mp.cpu_count() - 1, 63)  # Limit the number of workers to a value less than or equal to 63 to process in SPATANALYST01 server
+    num_processes = min(mp.cpu_count() - 1, 50)  # Limit the number of workers to a value less than or equal to 50 to process in SPATANALYST01 server
     print(f"\nUsing {num_processes} parallel processes")
     
     # Execute parallel processing
