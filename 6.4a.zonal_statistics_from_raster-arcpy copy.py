@@ -241,7 +241,7 @@ if __name__ == "__main__":
         worker_args.append(args)
     
     # Determine number of processes to use (limit to avoid handle overflow)
-    max_processes = min(8, mp.cpu_count() - 1)  # Limit to 8 processes to avoid handle issues
+    max_processes = min(20, mp.cpu_count() - 1)  # Limit to 20 processes to avoid handle issues
     batch_size = max_processes  # Process in batches
     
     print(f"\nUsing {max_processes} parallel processes")
