@@ -41,9 +41,9 @@ working_var = weather_vars[variable]
 if working_var in tc_vars:
     wd = r"Z:\PhD_Datasets&Analysis\Info_Inputs\TerraClimate\GeoTIFF"
     warmup_yrs = 0 # Number of years to be discarded for the warm-up period
-elif working_var in ["bflow2", "wyield2"]:
+elif working_var in ["bflow3", "wyield3"]:
     wd = r"Z:\PhD_Datasets&Analysis\Outputs\T&M_WBM" + r"\\" + working_var
-    working_var = working_var[:-1]  # Remove the last character '2' from the variable name
+    working_var = working_var[:-1]  # Remove the last character '3' from the variable name
     warmup_yrs = 6 # Number of years to be discarded for the warm-up period
 else:
     wd = r"Z:\PhD_Datasets&Analysis\Outputs\T&M_WBM" + r"\\" + working_var
