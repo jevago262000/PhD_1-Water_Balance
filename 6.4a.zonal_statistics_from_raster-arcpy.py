@@ -175,7 +175,7 @@ if __name__ == "__main__":
     out_geotiff = tc_ds + "\\GeoTIFF"
     serial_id = 'grdcno_int'
     tc_vars = ["ppt", "pet", "q"] # Variable names according to TerraClimate
-    wb_var = 'wyield2' # Example variable, can be changed as needed
+    wb_var = 'wyield3' # Example variable, can be changed as needed
     
     # Set up arcpy environment for main process (only for reading station IDs)
     import arcpy
@@ -219,12 +219,12 @@ if __name__ == "__main__":
     arcpy.ClearEnvironment("workspace")
     
     # Prepare variables for parallel processing
-    years = range(1958, 2024)  # Years to process
+    years = range(1958, 2023)  # Years to process
     processing_dir = tam_out_dir + '\\' + wb_var
     
-    if wb_var in ["bflow2", "wyield2"]:
-        wb_var = wb_var[:-1]  # Remove the last character '2'
-    
+    if wb_var in ["bflow3", "wyield3"]:
+        wb_var = wb_var[:-1]  # Remove the last character '3'
+
     raster_dir = css_folder + '\\Final_Rasters'
     
     print('\n############################################################')

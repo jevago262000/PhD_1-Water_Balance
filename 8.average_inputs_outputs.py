@@ -24,10 +24,10 @@ os.system('cls')
 #wd = input("Enter the path of the variable to be precessed: ")
 rangeYears = input("Type the interval of years to process (e.g., '1958-2023') "
                     "or just press Enter to take the interval by default (including a 6-yr warm-up period): ")
-variable = int(input("Type 1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow2', 10: 'wyield', 11: 'wyield2': "))
+variable = int(input("Type 1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow3', 10: 'wyield', 11: 'wyield3': "))
 
 # Options of variables
-weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow2', 10: 'wyield', 11: 'wyield2'}
+weather_vars = {1: 'ppt', 2: 'pet', 3: 'q', 4: 'eprec', 5: 'aet', 6: 'perc', 7: 'sstor', 8: 'bflow', 9: 'bflow3', 10: 'wyield', 11: 'wyield3'}
 bands_gee = ["pr", "pet", "ro"] # band names in gee
 tc_vars = ["ppt", "pet", "q"] # variable names according to TerraClimate
 
