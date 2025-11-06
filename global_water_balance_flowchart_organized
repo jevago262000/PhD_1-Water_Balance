@@ -1,0 +1,93 @@
+// Global Water Balance Workflow
+digraph {
+	dpi=600 nodesep=0.5 rankdir=TB ranksep=1.2 size="8,12!" splines=ortho
+	node [fontname=Arial fontsize=11]
+	edge [fontname=Arial fontsize=10]
+	graph [center=true]
+	subgraph cluster_inputs {
+		color="#0077b6" fillcolor="#e8f4f8" fontname=bold fontsize=14 label=Inputs penwidth=3 style=filled
+		Climate [label="TerraClimate
+(Precipitation, ET₀, Runoff)" fillcolor="#a9d6e5" shape=box style=filled]
+		Soil [label="SoilGrids2.0
+(Field Capacity, Wilting Point)" fillcolor="#a9d6e5" shape=box style=filled]
+		Rooting [label="CSIRO
+(Rooting Depth)" fillcolor="#a9d6e5" shape=box style=filled]
+		CSS_raw [label="GRDC-CSS Stations
+(Flow Stations, Drainage Areas)" fillcolor="#a9d6e5" shape=box style=filled]
+	}
+	subgraph cluster_preprocessing {
+		color="#6c757d" fillcolor="#f5f5f5" fontname=bold fontsize=14 label=Preprocessing penwidth=3 style=filled
+		Convert [label="Convert NetCDF → GeoTIFF" fillcolor="#d8e2dc" style=filled]
+		AWC [label="Calculate AWC = FC - WP" fillcolor="#d8e2dc" style=filled]
+		WHC [label="WHC = AWC × Rooting Depth" fillcolor="#d8e2dc" style=filled]
+		FilterCSS [label="Filter CSS Stations
+(>30 yrs, >48 sq km, consistent boundaries)" fillcolor="#d8e2dc" style=filled]
+		RecessionK [label="Determine k using HydroSignatures" fillcolor="#d8e2dc" style=filled]
+		RasterK [label="Rasterize k values" fillcolor="#d8e2dc" style=filled]
+	}
+	subgraph cluster_modeling {
+		color="#9d4edd" fillcolor="#f3e5f5" fontname=bold fontsize=14 label=Modeling penwidth=3 style=filled
+		MWBM [label="Monthly Water Balance Model
+(Thornthwaite-Mather, Ulmen)" fillcolor="#e1c1d7" style=filled]
+	}
+	subgraph cluster_publication {
+		color="#8b4513" fillcolor="#f5e6e8" fontname=bold fontsize=14 label=Publication penwidth=3 style=filled
+		Publish [label="Publish on GEE:
+WHC, k" fillcolor="#bb8588" style=filled]
+	}
+	graph [newrank=true]
+	{
+		rank=same
+		MWBM
+		Publish
+	}
+	subgraph cluster_outputs {
+		color="#52b788" fillcolor="#f0f8f0" fontname=bold fontsize=14 label=Outputs penwidth=3 style=filled
+		Outputs [label="Outputs:
+Peff, ETa, S, PERC, BF, Q" fillcolor="#dde5b6" shape=box style=filled]
+	}
+	subgraph cluster_validation {
+		color="#f4a261" fillcolor="#fff8e8" fontname=bold fontsize=14 label=Validation penwidth=3 style=filled
+		Validation [label="Compare with CSS Discharge
+(HydroErr: r, d1, MAE, PBIAS)" fillcolor="#ffe6a7" style=filled]
+	}
+	Period [label="Temporal Domain:
+1958–2023" shape=note]
+	Tools [label="Tools:
+Python, ArcPy, GEE
+HydroSignatures, HydroErr" shape=note]
+	InitialConditions [label=<Initial Conditions:<BR/>S: 0.1WHC, BF<SUB>i-1</SUB>: 10, warm-up yrs: 6> shape=note]
+	inv1 [style=invis width=0]
+	inv2 [style=invis width=0]
+	inv3 [style=invis width=0]
+	inv4 [style=invis width=0]
+	inv5 [style=invis width=0]
+	{
+		rank=same
+		inv4
+		MWBM
+		Publish
+		inv5
+	}
+	inv4 -> MWBM [style=invis]
+	MWBM -> Publish [style=invis weight=1]
+	Publish -> inv5 [style=invis]
+	Climate -> Convert
+	Soil -> AWC
+	Rooting -> WHC
+	AWC -> WHC
+	CSS_raw -> FilterCSS
+	FilterCSS -> RecessionK
+	RecessionK -> RasterK
+	RasterK -> Publish
+	WHC -> Publish
+	Convert -> MWBM
+	WHC -> MWBM
+	RasterK -> MWBM
+	InitialConditions -> MWBM [style=dashed]
+	MWBM -> Outputs
+	FilterCSS -> Validation
+	Outputs -> Validation
+	Period -> MWBM [style=dashed]
+	Period -> RecessionK [style=dashed]
+}
