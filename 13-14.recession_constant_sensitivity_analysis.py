@@ -388,12 +388,12 @@ mlabels = ['J','F','M','A','M','J','J','A','S','O','N','D']
 ax.fill_between(months, seasonal['q25'], seasonal['q75'],
                 color='#1E88E5', alpha=0.18, label='Inter-basin IQR')
 ax.plot(months, seasonal['mean'], color='#1E88E5', lw=2,
-        marker='o', ms=5, label='Mean Δ (obs k − k=0.5)')
+        marker='o', ms=5, label='Mean Δ (MRC-der k − k=0.5)')
 ax.axhline(0, color='black', lw=1.0, ls='--')
 ax.set_xticks(months)
 ax.set_xticklabels(mlabels, fontsize=9)
 ax.set_xlabel('Calendar month', fontsize=10)
-ax.set_ylabel('Mean Δ water yield: obs k − k=0.5 (mm/month)', fontsize=10)
+ax.set_ylabel('Mean Δ water yield: MRC-der k − k=0.5 (mm/month)', fontsize=10)
 ax.set_title(
     '(C) TIMING differs: seasonal redistribution of water yield\n'
     'MRC-derived k moves water from high-flow to low-flow months',
