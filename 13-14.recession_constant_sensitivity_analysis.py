@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Sensitivity analysis of the streamflow recession constant k:
-observed k (estimated per basin from observed streamflow via the Master
+MRC-derived k (estimated per basin from observed streamflow via the Master
 Recession Curve, MRC) vs a fixed k = 0.5, across 588 CSS pristine basins.
 
 Both parameterizations are estimates; neither is treated as ground truth.
@@ -106,7 +106,7 @@ for sid, grp in merged.groupby(id_col):
         'abs_diff':   np.abs(diff).mean(),
         'pbias':      100 * diff.sum() / v4.sum() if v4.sum() != 0 else np.nan,
         # RMSD = root-mean-square DIFFERENCE between the two parameterizations.
-        # Symmetric: neither series is treated as truth (observed k is itself
+        # Symmetric: neither series is treated as truth (MRC-derived k is itself
         # an MRC estimate), so this is divergence, not error.
         'rmsd':       rmsd,
         'rel_rmsd':   100 * rmsd / v4.mean() if v4.mean() > 0 else np.nan,
@@ -124,7 +124,7 @@ df_b['quartile'] = pd.qcut(
 # by calendar month, pooled across all basin-months. A linear
 # reservoir conserves volume, so k only REDISTRIBUTES water in
 # time -- this curve is the signature of that redistribution and
-# is the core justification for estimating observed k per basin.
+# is the core justification for estimating MRC-derived k per basin.
 # ------------------------------------------------------------
 if 'MONTH_w2' in merged.columns:
     merged['_month'] = merged['MONTH_w2']
@@ -189,7 +189,7 @@ print(f"\n{'='*60}")
 print("LEVEL 1: Basin annual means")
 print(f"{'='*60}")
 print(f"  n basins         : {len(B2)}")
-print(f"  Mean (observed k): {B2.mean():.4f} mm/month")
+print(f"  Mean (MRC-derived k): {B2.mean():.4f} mm/month")
 print(f"  Mean (fixed k=0.5): {B4.mean():.4f} mm/month")
 print(f"  Mean difference  : {(B2-B4).mean():.4f} mm/month")
 print(f"  Paired t-test    : t={t1:.4f},  {sig_label(tp1)}")
@@ -205,7 +205,7 @@ print(f"\n{'='*60}")
 print("LEVEL 2: All monthly values pooled")
 print(f"{'='*60}")
 print(f"  n station-months : {len(v2_all):,}")
-print(f"  Mean (observed k): {v2_all.mean():.4f} mm/month")
+print(f"  Mean (MRC-derived k): {v2_all.mean():.4f} mm/month")
 print(f"  Mean (fixed k=0.5): {v4_all.mean():.4f} mm/month")
 print(f"  Mean difference  : {(v2_all-v4_all).mean():.4f} mm/month")
 print(f"  Paired t-test    : t={t2:.4f},  {sig_label(tp2)}")
@@ -238,7 +238,7 @@ print(f"    r = {rp1:.6f} | PBIAS = {pb1:.3f}% | "
 print( "    Long-term basin-mean water yield is k-invariant (linear")
 print( "    reservoir conserves volume); choosing k = 0.5 where no data")
 print( "    exist introduces negligible volumetric bias.")
-print( "  TIMING (monthly)    -> justifies estimating observed k per basin:")
+print( "  TIMING (monthly)    -> justifies estimating MRC-derived k per basin:")
 print(f"    per-basin RMSD median = {rmsd_med:.2f} mm/month "
       f"({relrmsd_med:.1f}% of mean flow, p90 = {relrmsd_p90:.1f}%)")
 print(f"    seasonal redistribution: obs k yields MOST in {MONTH_NAMES[hi_month-1]} "
@@ -339,7 +339,7 @@ ax.plot([lo, hi], [lo, hi], 'k--', lw=1, label='1:1')
 cb = plt.colorbar(sc, ax=ax, pad=0.02)
 cb.set_label(ABS_LABEL, fontsize=9)
 ax.set_xlabel('Mean water yield, fixed k = 0.5 (mm/month)', fontsize=10)
-ax.set_ylabel('Mean water yield, observed k (mm/month)', fontsize=10)
+ax.set_ylabel('Mean water yield, MRC-derived k (mm/month)', fontsize=10)
 r_A = df_b["mean_w2"].corr(df_b["mean_w4"])
 ax.set_title(
     f'(A) VOLUME is conserved: long-term basin-mean water yield\n'
@@ -348,8 +348,8 @@ ax.set_title(
 )
 ax.text(
     0.04, 0.96,
-    'Long-term means are insensitive to k\n'
-    '→ k = 0.5 is defensible for ungauged areas',
+    'Long-term means are insensitive to k',
+    #'\n→ k = 0.5 is defensible for ungauged areas',
     transform=ax.transAxes, fontsize=8.5, va='top',
     bbox=dict(boxstyle='round', fc='#E8F5E9', ec='#43A047', alpha=0.9)
 )
@@ -379,7 +379,7 @@ ax.grid(alpha=0.25)
 ax.set_ylim(0, 100)
 
 # --- Panel C: Seasonal redistribution (obs k - k=0.5) by month ---
-# This is the timing signal that volume conservation hides: observed k
+# This is the timing signal that volume conservation hides: MRC-derived k
 # shifts water OUT of high-flow months INTO low-flow months. It is the
 # core justification for estimating observed recession constants per basin.
 ax = fig.add_subplot(gs[1, 0])
@@ -396,13 +396,13 @@ ax.set_xlabel('Calendar month', fontsize=10)
 ax.set_ylabel('Mean Δ water yield: obs k − k=0.5 (mm/month)', fontsize=10)
 ax.set_title(
     '(C) TIMING differs: seasonal redistribution of water yield\n'
-    'Observed k moves water from high-flow to low-flow months',
+    'MRC-derived k moves water from high-flow to low-flow months',
     fontsize=10
 )
 ax.text(
     0.04, 0.04,
-    'Volume conserved, but timing changes\n'
-    '→ estimating observed k per basin is worthwhile',
+    'Volume conserved, but timing changes',
+    #'\n→ estimating MRC-derived k per basin is worthwhile',
     transform=ax.transAxes, fontsize=8.5, va='bottom',
     bbox=dict(boxstyle='round', fc='#FFF3E0', ec='#FB8C00', alpha=0.9)
 )
@@ -478,9 +478,9 @@ ax.set_title(
 ax.grid(alpha=0.25, axis='y')
 
 fig.suptitle(
-    'Recession-constant sensitivity: observed k vs fixed k = 0.5\n'
+    'Recession-constant sensitivity: MRC-derived k vs fixed k = 0.5\n'
     'Top: long-term VOLUME is k-invariant (k=0.5 OK for ungauged).  '
-    'Bottom: monthly TIMING differs (observed k is worthwhile).\n'
+    'Bottom: monthly TIMING differs (MRC-derived k is worthwhile).\n'
     f'CSS pristine basins -- {len(df_b)} target drainage areas  |  '
     'Period 1958-2023',
     fontsize=11, fontweight='bold', y=0.995
@@ -560,7 +560,7 @@ p.add_run(
 
 # Section 2
 doc.add_heading('2. Monthly timing does change '
-                '(supports estimating observed k where data allow)', level=1)
+                '(supports estimating MRC-derived k where data allow)', level=1)
 doc.add_paragraph(
     'The differences that cancel in the long-term mean are real at the '
     'monthly scale, which is the scale that matters for streamflow dynamics:')
@@ -580,7 +580,7 @@ p.add_run(
     'squared monthly differences between the two series, computed per basin '
     'and expressed in the same units as water yield (mm/month). It is used '
     'instead of RMSE (root-mean-square error) on purpose: "error" implies one '
-    'series is the true reference, whereas here the observed k is itself an '
+    'series is the true reference, whereas here the MRC-derived k is itself an '
     'MRC-derived estimate, so neither series is ground truth. RMSD is '
     'symmetric - it makes no such assumption - and quantifies the typical '
     'month-to-month divergence between the two parameterizations. Because the '
@@ -589,14 +589,14 @@ p.add_run(
     'difference, |Δ|; reporting both shows the typical divergence (|Δ|) and '
     'its tail (RMSD). Both vanish in the long-term mean (Section 1) yet remain '
     'substantial month to month, which is precisely the timing information '
-    'that estimating observed k recovers.')
+    'that estimating MRC-derived k recovers.')
 p = doc.add_paragraph()
 p.add_run('Seasonal redistribution (the timing signal). ').bold = True
 p.add_run(
-    f'Relative to fixed k = 0.5, the observed k shifts water out of high-flow '
+    f'Relative to fixed k = 0.5, the MRC-derived k shifts water out of high-flow '
     f'months into low-flow months, consistent with the basin-specific '
     f'storage-and-release behaviour captured by a recession constant derived '
-    f'from the actual streamflow. The signed difference (observed k minus '
+    f'from the actual streamflow. The signed difference (MRC-derived k minus '
     f'k = 0.5) peaks at +{hi_val:.2f} mm/month in {MONTH_NAMES[hi_month-1]} '
     f'and is most negative at {lo_val:.2f} mm/month in '
     f'{MONTH_NAMES[lo_month-1]} (see Table_S1_seasonal_redistribution.csv).')
@@ -620,7 +620,7 @@ b.add_run('Fixed k = 0.5 for ungauged areas: ').bold = True
 b.add_run(f'supported - long-term water yield is k-invariant '
           f'(PBIAS {pb1:.3f}%, r {rp1:.4f}).')
 b = doc.add_paragraph(style='List Bullet')
-b.add_run('Observed k where data allow: ').bold = True
+b.add_run('MRC-derived k where data allow: ').bold = True
 b.add_run(f'supported - it changes the monthly timing/seasonality '
           f'(median RMSD {rmsd_med:.2f} mm/month, {relrmsd_med:.1f}% of mean '
           f'flow) that the long-term mean hides.')

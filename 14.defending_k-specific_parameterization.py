@@ -4,10 +4,10 @@ Extended Analysis: Defending k-specific parameterization
 while justifying k=0.5 for ungauged areas.
 
 Strategy:
-  1. Identify basins where observed k differs most from 0.5
+  1. Identify basins where MRC-derived k differs most from 0.5
   2. Show that in those basins, wyield2 ≠ wyield4 substantially
   3. Stratify performance by deviation from k=0.5
-  4. Frame: "where k matters, observed k makes a difference;
+  4. Frame: "where k matters, MRC-derived k makes a difference;
              where k is close to 0.5, the default is justified"
 """
 
@@ -107,7 +107,7 @@ df_b['abs_diff_pct'] = 100 * df_b['abs_diff'] / df_b['mean_w4'].replace(0, np.na
 # KEY DERIVED METRICS
 # ============================================================
 # k-deviation proxy: basins where wyield2 and wyield4 differ
-# most = basins where observed k deviates most from 0.5
+# most = basins where MRC-derived k deviates most from 0.5
 df_b['k_deviation_proxy'] = df_b['abs_diff'].abs()
 
 # Quartile grouping by absolute difference
@@ -121,7 +121,7 @@ df_b['quartile'] = pd.qcut(df_b['abs_diff'],
 print(f"\nBasin quartile breakdown by absolute difference:")
 print(df_b.groupby('quartile')[['abs_diff','pbias','rmse','mean_w2','mean_w4']].mean().round(4))
 
-# Basins where observed k matters most (top 25%)
+# Basins where MRC-derived k matters most (top 25%)
 top25 = df_b[df_b['abs_diff'] >= df_b['abs_diff'].quantile(0.75)]
 bot25 = df_b[df_b['abs_diff'] <= df_b['abs_diff'].quantile(0.25)]
 
@@ -157,7 +157,7 @@ ax.set_ylabel('Number of basins', fontsize=10)
 ax.set_title('(A) Basin-level k-parameterization impact\n(proxy: |wyield2 – wyield4| per basin)', fontsize=10)
 ax.legend(fontsize=8)
 ax.text(0.97, 0.95,
-        f"n = {len(df_b)} basins\nMost basins: small diff\n→ k=0.5 justified\nSome basins: large diff\n→ observed k adds value",
+        f"n = {len(df_b)} basins\nMost basins: small diff\n→ k=0.5 justified\nSome basins: large diff\n→ MRC-derived k adds value",
         transform=ax.transAxes, fontsize=8.5, va='top', ha='right',
         bbox=dict(boxstyle='round,pad=0.4', fc='white', alpha=0.85))
 
@@ -173,7 +173,7 @@ cb = plt.colorbar(sc, ax=ax)
 cb.set_label('Mean abs diff (mm/month)', fontsize=8)
 ax.set_xlabel('Mean water yield — fixed k=0.5 (mm/month)', fontsize=10)
 ax.set_ylabel('PBIAS per basin (%)', fontsize=10)
-ax.set_title('(B) Per-basin PBIAS: observed k vs fixed k=0.5\n(color = magnitude of k-parameterization impact)', fontsize=10)
+ax.set_title('(B) Per-basin PBIAS: MRC-derived k vs fixed k=0.5\n(color = magnitude of k-parameterization impact)', fontsize=10)
 ax.legend(fontsize=8)
 
 # --- Panel C: Quartile comparison —  mean diff per quartile ---
@@ -193,7 +193,7 @@ for bar, n in zip(bars, q_stats['n']):
             f'n={n}', ha='center', va='bottom', fontsize=8.5)
 ax.set_xlabel('Quartile by absolute difference', fontsize=10)
 ax.set_ylabel('Mean |wyield2 – wyield4| (mm/month)', fontsize=10)
-ax.set_title('(C) k-parameterization impact by quartile\n(Q4 = basins where observed k adds most value)', fontsize=10)
+ax.set_title('(C) k-parameterization impact by quartile\n(Q4 = basins where MRC-derived k adds most value)', fontsize=10)
 
 # --- Panel D: Cumulative distribution of abs_diff ---
 ax = fig.add_subplot(gs[1, 0])
@@ -218,7 +218,7 @@ cmap_q = {
     'Q1\n(smallest diff)': (CG,     'Q1 — k≈0.5, default justified'),
     'Q2':                  ('#FFC107','Q2'),
     'Q3':                  ('#FF7043','Q3'),
-    'Q4\n(largest diff)':  (CRED,    'Q4 — observed k adds value')
+    'Q4\n(largest diff)':  (CRED,    'Q4 — MRC-derived k adds value')
 }
 for q, (clr, lbl) in cmap_q.items():
     sub = df_b[df_b['quartile'] == q]
@@ -229,8 +229,8 @@ lo = min(df_b['mean_w2'].min(), df_b['mean_w4'].min())
 hi = max(df_b['mean_w2'].max(), df_b['mean_w4'].max())
 ax.plot([lo, hi], [lo, hi], 'k--', lw=1)
 ax.set_xlabel('Mean water yield — fixed k=0.5 (mm/month)', fontsize=10)
-ax.set_ylabel('Mean water yield — observed k (mm/month)', fontsize=10)
-ax.set_title('(E) 1:1 scatter coloured by k-parameterization impact\n(red = basins where observed k matters most)', fontsize=10)
+ax.set_ylabel('Mean water yield — MRC-derived k (mm/month)', fontsize=10)
+ax.set_title('(E) 1:1 scatter coloured by k-parameterization impact\n(red = basins where MRC-derived k matters most)', fontsize=10)
 ax.legend(fontsize=7.5, loc='upper left')
 
 # --- Panel F: Dual argument summary text ---
@@ -246,10 +246,10 @@ pct_large = (df_b['abs_diff'] > df_b['abs_diff'].quantile(0.75)).mean() * 100
 summary = (
     "DUAL ARGUMENT SUMMARY\n"
     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-    "WHY OBSERVED k WAS WORTH IT:\n"
+    "WHY MRC-DERIVED k WAS WORTH IT:\n"
     f"  • Top 25% basins: mean|diff| = {top25['abs_diff'].mean():.3f} mm/month\n"
     f"  • Top 10%: |diff| > {pct90:.3f} mm/month\n"
-    "  • Observed k follows MRC (R²=0.98)\n"
+    "  • MRC-derived k follows MRC (R²=0.98)\n"
     "  • Physically meaningful, basin-specific\n"
     "  • Reduces uncertainty where k ≠ 0.5\n"
     "  • Reproducible, data-driven method\n"
@@ -264,7 +264,7 @@ summary = (
     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     "CONCLUSION:\n"
     "  Tiered parameterization:\n"
-    "  → Gauged:   use observed k\n"
+    "  → Gauged:   use MRC-derived k\n"
     "  → Ungauged: k=0.5 (justified by\n"
     "              sensitivity analysis)"
 )
