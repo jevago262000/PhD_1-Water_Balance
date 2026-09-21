@@ -34,8 +34,8 @@ BASE = Path(r'D:\OneDrive - CGIAR\Documents\PhD_JLU Giessen\Papers\Paper1\Proces
 W2   = BASE / 'wyield2_zonal_statistics_1958-2023.csv'
 W4   = BASE / 'wyield4_zonal_statistics_1958-2023.csv'
 TDA  = BASE / 'Target_Drainage_Areas.txt'
-#FIGS = BASE / 'Figures'
-#FIGS.mkdir(exist_ok=True)
+FIGS = Path(r"D:\OneDrive - CGIAR\Documents\PhD_JLU Giessen\Papers\Paper1\Figures")
+FIGS.mkdir(exist_ok=True)
 
 # ============================================================
 # 1. LOAD DATA
@@ -285,7 +285,7 @@ df_stats = pd.DataFrame(rows_stats, columns=[
     'Significance/Effect', 'n', 'Notes', 'Analysis level'
 ])
 out_stats = BASE / 'Table_S1_statistical_tests.csv'
-df_stats.to_csv(out_stats, index=False)
+#df_stats.to_csv(out_stats, index=False)
 print(f"\n  Table S1 saved: {out_stats}")
 
 # ============================================================
@@ -300,7 +300,7 @@ df_export.columns = [
     'rmsd_mm_month', 'rel_rmsd_pct', 'n_months', 'abs_diff_quartile'
 ]
 out_basin = BASE / 'Table_S1_basin_summary.csv'
-df_export.to_csv(out_basin, index=False)
+#df_export.to_csv(out_basin, index=False)
 print(f"  Basin summary saved: {out_basin}")
 
 # Seasonal redistribution table (timing signal)
@@ -308,7 +308,7 @@ seasonal_out = seasonal.copy()
 seasonal_out.index.name = 'month'
 seasonal_out.columns = ['mean_diff_mm_month', 'q25_mm_month', 'q75_mm_month']
 out_seasonal = BASE / 'Table_S1_seasonal_redistribution.csv'
-seasonal_out.to_csv(out_seasonal)
+#seasonal_out.to_csv(out_seasonal)
 print(f"  Seasonal table saved: {out_seasonal}")
 
 # ============================================================
@@ -319,12 +319,13 @@ print("\nGenerating Figure S1...")
 fig = plt.figure(figsize=(14, 10))
 gs  = gridspec.GridSpec(2, 2, figure=fig, hspace=0.38, wspace=0.32)
 
-CMAP = 'RdYlGn_r'
+# Perceptually uniform, colour-blind-safe sequential map (replaces red-green RdYlGn_r)
+CMAP = 'viridis'
 
 # Single consistent label for the mean monthly absolute difference (abs_diff),
-# reused across Panels A (colorbar), B (x-axis) and D (x-axis) so the quantity
+# reused across Panels a (colorbar), b (x-axis) and d (x-axis) so the quantity
 # is presented identically everywhere it appears.
-ABS_LABEL = 'Mean monthly absolute difference, |Δ| (mm/month)'
+ABS_LABEL = 'Mean monthly absolute difference, |Δ| (mm month⁻¹)'
 
 # --- Panel A: Scatter coloured by abs_diff ---
 ax = fig.add_subplot(gs[0, 0])
@@ -338,11 +339,11 @@ hi = max(df_b['mean_w2'].max(), df_b['mean_w4'].max())
 ax.plot([lo, hi], [lo, hi], 'k--', lw=1, label='1:1')
 cb = plt.colorbar(sc, ax=ax, pad=0.02)
 cb.set_label(ABS_LABEL, fontsize=9)
-ax.set_xlabel('Mean water yield, fixed k = 0.5 (mm/month)', fontsize=10)
-ax.set_ylabel('Mean water yield, MRC-derived k (mm/month)', fontsize=10)
+ax.set_xlabel('Mean water yield, fixed k = 0.5 (mm month⁻¹)', fontsize=10)
+ax.set_ylabel('Mean water yield, MRC-derived k (mm month⁻¹)', fontsize=10)
 r_A = df_b["mean_w2"].corr(df_b["mean_w4"])
 ax.set_title(
-    f'(A) VOLUME is conserved: long-term basin-mean water yield\n'
+    f'(a) VOLUME is conserved: long-term basin-mean water yield\n'
     f'n = {len(df_b)} basins  |  r = {r_A:.6f}  |  PBIAS = {pb1:.3f}%',
     fontsize=10
 )
@@ -359,19 +360,24 @@ ax.legend(fontsize=9, loc='lower right')
 ax = fig.add_subplot(gs[0, 1])
 sorted_diff = np.sort(df_b['abs_diff'])
 cdf = np.arange(1, len(sorted_diff) + 1) / len(sorted_diff)
-ax.plot(sorted_diff, cdf * 100, color='#1E88E5', lw=2)
-for pct, clr in [(25, '#43A047'), (50, '#FF9800'), (75, '#E53935')]:
+# Dark-grey curve so the coloured percentile lines stand out against it
+ax.plot(sorted_diff, cdf * 100, color='0.2', lw=2)
+# Percentile lines take their colour from the same viridis ramp as Panel a
+# (position = percentile), so they read in order without relying on red/green.
+# P25/P50/P75 are also the quartile boundaries used in Panel d.
+for pct in (25, 50, 75):
+    clr = plt.get_cmap(CMAP)(pct / 100)
     val = np.percentile(sorted_diff, pct)
-    ax.axvline(val, color=clr, lw=1.2, ls='--',
-               label=f'P{pct} = {val:.3f} mm/month')
-    ax.axhline(pct, color=clr, lw=0.5, ls=':')
+    ax.axvline(val, color=clr, lw=1.4, ls='--',
+               label=f'P{pct} = {val:.3f} mm month⁻¹')
+    ax.axhline(pct, color=clr, lw=0.6, ls=':')
 ax.set_xlabel(ABS_LABEL, fontsize=10)
 ax.set_ylabel('Cumulative percentage of basins (%)', fontsize=10)
 ax.set_title(
-    f'(B) How large are the monthly differences? (per-basin |Δ|)\n'
+    f'(b) How large are the monthly differences? (per-basin |Δ|)\n'
     f'Mean = {df_b["abs_diff"].mean():.3f}  |  '
     f'Median = {df_b["abs_diff"].median():.3f}  |  '
-    f'Max = {df_b["abs_diff"].max():.3f} mm/month',
+    f'Max = {df_b["abs_diff"].max():.3f} mm month⁻¹',
     fontsize=10
 )
 ax.legend(fontsize=9)
@@ -393,9 +399,9 @@ ax.axhline(0, color='black', lw=1.0, ls='--')
 ax.set_xticks(months)
 ax.set_xticklabels(mlabels, fontsize=9)
 ax.set_xlabel('Calendar month', fontsize=10)
-ax.set_ylabel('Mean Δ water yield: MRC-der k − k=0.5 (mm/month)', fontsize=10)
+ax.set_ylabel('Mean Δ water yield: MRC-der k − k=0.5 (mm month⁻¹)', fontsize=10)
 ax.set_title(
-    '(C) TIMING differs: seasonal redistribution of water yield\n'
+    '(c) TIMING differs: seasonal redistribution of water yield\n'
     'MRC-derived k moves water from high-flow to low-flow months',
     fontsize=10
 )
@@ -421,7 +427,9 @@ ax.grid(alpha=0.25)
 # the magnitude of the monthly divergence visible.
 ax = fig.add_subplot(gs[1, 1])
 q_labels = ['Q1', 'Q2', 'Q3', 'Q4']
-q_colors = ['#43A047', '#8BC34A', '#FF9800', '#E53935']
+# Quartile colours from the same viridis ramp as Panel a (Q1 low |Δ| -> Q4 high |Δ|),
+# centred in each quartile so they sit between the P25/P50/P75 line colours of Panel b
+q_colors = plt.get_cmap(CMAP)([0.125, 0.375, 0.625, 0.875])
 
 data_rmsd = [df_b.loc[df_b['quartile'] == q, 'rmsd'].values
              for q in q_labels]
@@ -439,7 +447,7 @@ bp = ax.boxplot(
     flierprops=dict(marker='o', ms=2.5, alpha=0.35)
 )
 for patch, clr in zip(bp['boxes'], q_colors):
-    patch.set_facecolor(clr + '99')
+    patch.set_facecolor((*clr[:3], 0.6))  # same ~60% opacity as before
 
 # Headroom on top so the n= row (placed in axes coordinates) clears the
 # highest outliers and nothing falls outside the axes.
@@ -468,10 +476,10 @@ ax.set_xticklabels(q_ranges, fontsize=8.5)
 # lowercase delta).
 ax.set_xlabel('Quartile of ' + ABS_LABEL[0].lower() + ABS_LABEL[1:],
               fontsize=10)
-ax.set_ylabel('Per-basin monthly RMSD (mm/month)', fontsize=10)
+ax.set_ylabel('Per-basin monthly RMSD (mm month⁻¹)', fontsize=10)
 ax.set_title(
-    '(D) Monthly divergence grows with |Δ|\n'
-    f'Median RMSD = {df_b["rmsd"].median():.2f} mm/month  '
+    '(d) Monthly divergence grows with |Δ|\n'
+    f'Median RMSD = {df_b["rmsd"].median():.2f} mm month⁻¹  '
     f'({df_b["rel_rmsd"].median():.1f}% of mean flow)',
     fontsize=10
 )
@@ -486,8 +494,8 @@ fig.suptitle(
     fontsize=11, fontweight='bold', y=0.995
 )
 
-#out_fig = FIGS / 'Figure_S1_k_sensitivity.png'
-out_fig = BASE / 'Figure_S1_k_sensitivity.png'
+out_fig = FIGS / 'FigS1.png'
+#out_fig = BASE / 'Figure_S1_k_sensitivity.png'
 plt.savefig(out_fig, dpi=300, bbox_inches='tight', facecolor='white')
 print(f"  Figure S1 saved: {out_fig}")
 plt.show()
@@ -645,7 +653,7 @@ nr.italic = True
 nr.font.size = Pt(8)
 
 out_interp = BASE / 'Figure_S1_interpretation.docx'
-doc.save(out_interp)
+#doc.save(out_interp)
 print(f"  Interpretation saved: {out_interp}")
 
 print("\n" + "="*60)
